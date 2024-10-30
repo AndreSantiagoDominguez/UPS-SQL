@@ -12,11 +12,11 @@ def crear_usuario(data):
     newUser = User(
         first_name=data['first_name'],
         last_name=data['last_name'],
-        email=data['credentials']['email'],
-        password=data['credentials']['password'],
-        state=data['address']['state'],
-        locality=data['address']['locality'],
-        distrit=data['address']['distrit']
+        email=data['email'],
+        password=data['password'],
+        state=data['state'],
+        locality=data['locality'],
+        distrit=data['distrit']
     )
 
     db.session.add(newUser)
@@ -25,7 +25,6 @@ def crear_usuario(data):
         "mensaje": "Usuario creado con bcrypt",
         "id": newUser.id_user,
         "nombre": newUser.first_name,
-        "email": newUser.email
     }), 201
 
 # def crear_usuario_base(data):

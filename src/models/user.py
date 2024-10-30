@@ -1,9 +1,10 @@
 # Importamos las dependencias
-from src.models.dataTypes import AccessCredentialsType, AddressType
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
+import json
+from sqlalchemy import JSON
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 load_dotenv()  
@@ -18,8 +19,8 @@ class User(db.Model):
     id_user = db.Column(db.Integer, primary_key = True, autoincrement = True)
     first_name = db.Column(db.String(50), nullable = False)
     last_name = db.Column(db.String(50), nullable = False)
-    address = db.Column(AddressType)
-    credentials = db.Column(AccessCredentialsType)
+    credentials = db.Column(JSON, nullable = False)
+    address = db.Column(JSON, nullable = False)
 
     def __init__(self, first_name, last_name, email, password, state, locality, distrit):
         self.first_name = first_name
