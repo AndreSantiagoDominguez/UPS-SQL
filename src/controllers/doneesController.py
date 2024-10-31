@@ -1,31 +1,36 @@
 from flask import jsonify
-from src.models.user import User, db
+from src.models.donee import Donee, db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-def crear_usuario(data):
-    # if not nombre or not email or not password:
-    #     return jsonify({"mensaje": "Faltan campos obligatorios"}), 400
+def createDonee(data):
+    try:
+        print(data['email'])
+        # Obtener los datos
+        newDonee = Donee(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data['email'],
+            password=data['password'],
+            state=data['state'],
+            locality=data['locality'],
+            distrit=data['distrit'],
+            list_contributions=data['list'],
+        )
 
-    # if User.query.filter_by(email=email).first():
-    #     return jsonify({"mensaje": "El email ya está registrado"}), 400 
+        # Inserción 
+        db.session.add(newDonee)
+        db.session.commit()
 
-    newUser = User(
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-        email=data['email'],
-        password=data['password'],
-        state=data['state'],
-        locality=data['locality'],
-        distrit=data['distrit']
-    )
-
-    db.session.add(newUser)
-    db.session.commit()
-    return jsonify({
-        "mensaje": "Usuario creado con bcrypt",
-        "id": newUser.id_user,
-        "nombre": newUser.first_name,
-    }), 201
+        # resultado
+        return jsonify({
+            "msg": "Success",
+            "id_donee": newDonee.id_donee,
+        }), 201
+    except Exception as e:
+         return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 # def crear_usuario_base(data):
 #     nombre = data.get('nombre')

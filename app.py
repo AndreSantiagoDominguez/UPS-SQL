@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from config import config
-from src.routes.userRoutes import usuario_blueprint
+from src.routes.doneesRoutes import doneesBlueprint
 from src.models.user import db
 
 def create_app():
@@ -10,7 +10,7 @@ def create_app():
     app.config.from_object(config['development'])
     db.init_app(app)
     jwt = JWTManager(app)
-    app.register_blueprint(usuario_blueprint)
+    app.register_blueprint(doneesBlueprint, url_prefix="/donees")
     return app
 
 if __name__ == '__main__':

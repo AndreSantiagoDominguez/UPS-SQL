@@ -1,13 +1,13 @@
 from flask import Blueprint, request
-from src.controllers.userController import crear_usuario
+from src.controllers.doneesController import createDonee
 from flask_jwt_extended import JWTManager
 
-usuario_blueprint = Blueprint('usuarios', __name__)
+doneesBlueprint = Blueprint('donees', __name__)
 
-@usuario_blueprint.route('/users', methods=['POST'])
-def crear_usuario_base():
+@doneesBlueprint.route('/add', methods=['POST'])
+def addDonee():
     data = request.get_json()
-    return crear_usuario(data)
+    return createDonee(data)
 
 # @usuario_blueprint.route('/users_base', methods=['POST'])
 # def crear_usuario_base_ruta():
