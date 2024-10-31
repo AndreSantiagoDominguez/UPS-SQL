@@ -5,16 +5,21 @@ class AccessCredentials(TypeDecorator):
     impl = VARCHAR
 
     def process_bind_param(self, value, dialect):
-        if value is not None:
-            # Formato para tipo compuesto en PostgreSQL
+        print(value)
+        if value:
+            # Asegúrate de que el valor esté en el formato esperado para PostgreSQL
             return f'("{value["email"]}", "{value["password"]}")'
         return None
 
     def process_result_value(self, value, dialect):
-        if value is not None:
-            # Convierte el valor de vuelta a diccionario
-            email, password = value[1:-1].split(", ")
-            return {"email": email.strip('"'), "password": password.strip('"')}
+        print(value)
+        if value:
+            try:
+                # Separa y elimina comillas
+                email, password = value[1:-1].split(", ")
+                return {"email": email.strip('"'), "password": password.strip('"')}
+            except ValueError:
+                return None
         return None
 
 # Clase para el tipo compuesto address
