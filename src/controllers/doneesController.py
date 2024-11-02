@@ -1,10 +1,13 @@
+from tokenize import String
+from typing import cast
 from flask import jsonify
+from sqlalchemy import func, select, text
 from src.models.donee import Donee, db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 def createDonee(data):
     try:
-        print(data['email'])
+        print(data)
         # Obtener los datos
         newDonee = Donee(
             first_name=data['first_name'],
@@ -14,8 +17,10 @@ def createDonee(data):
             state=data['state'],
             locality=data['locality'],
             distrit=data['distrit'],
-            list_contributions=data['list'],
+            phone_number=data['phone_number']
         )
+
+        print(newDonee)
 
         # Inserción 
         db.session.add(newDonee)
@@ -24,60 +29,80 @@ def createDonee(data):
         # resultado
         return jsonify({
             "msg": "Success",
-            "id_donee": newDonee.id_donee,
+            "id_donee": newDonee.id_donee
         }), 201
     except Exception as e:
-         return jsonify({
+        return jsonify({
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
 
-# def crear_usuario_base(data):
-#     nombre = data.get('nombre')
-#     email = data.get('email')
-#     password = data.get('password')
-#     if not nombre or not email or not password:
-#         return jsonify({"mensaje": "Faltan campos obligatorios"}), 400
-#     if User.query.filter_by(email=email).first():
-#         return jsonify({"mensaje": "El email ya está registrado"}), 400
-#     nuevo_usuario = User(nombre=nombre, email=email, password=password)
-#     db.session.add(nuevo_usuario)
-#     db.session.commit()
-#     return jsonify({
-#         "mensaje": "Usuario creado sin bcrypt",
-#         "id": nuevo_usuario.id,
-#         "nombre": nuevo_usuario.nombre,
-#         "email": nuevo_usuario.email
-#     }), 201
+@jwt_required
+def updateDonee(id_donee, data):
+    try:
+        # Buscar el donatario en la base de datos
+        donee = Donee.query.get(id_donee)
 
-# def login_usuario(data):
-#     email = data.get('email')
-#     password = data.get('password')
-#     user = User.query.filter_by(email=email).first()
-#     if not user:
-#         return jsonify({"mensaje": "Credenciales inválidas"}), 401
-#     if not user.check_password(password):
-#         return jsonify({"mensaje": "Credenciales inválidas"}), 401
-#     access_token = create_access_token(identity=user.id)
-#     return jsonify({"mensaje": "Inicio de sesión exitoso", "token": access_token}), 200
+        if not donee:
+            return jsonify({"error": "Donee not found"}), 404
 
-# @jwt_required()
-# def obtener_usuario():
-#     user_id = get_jwt_identity()
-#     user = User.query.get(user_id)
-#     if not user:
-#         return jsonify({"mensaje": "Usuario no encontrado"}), 404
-#     return jsonify({
-#         "id": user.id,
-#         "nombre": user.nombre,
-#         "email": user.email
-#     }), 200
+        # Actualizar solo los atributos que se proporcionan en el data
+        for key, value in data.items():
+            if hasattr(donee, key):
+                setattr(donee, key, value)
 
-# @jwt_required()
-# def eliminar_usuario(user_id):
-#     user = User.query.get(user_id)
-#     if not user:
-#         return jsonify({"mensaje": "Usuario no encontrado"}), 404
-#     db.session.delete(user)
-#     db.session.commit()
-#     return jsonify({"mensaje": "Usuario eliminado"}), 200
+        # Guardar los cambios en la base de datos
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Donee updated successfully",
+            "id_donee": donee.id_donee,
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
+
+def login(data):
+    email = data.get('email')
+    password = data.get('password')
+
+    stmt = select(Donee)
+
+    # Ejecutar la consulta
+    result = db.session.execute(stmt).scalars().all()
+
+    # Imprimir los resultados
+    for donee in result:
+        print(donee)
+
+
+
+    # if not donee:
+    #     return jsonify({"mensaje": "Credenciales inválidas"}), 401
+    # if not donee.check_password(password):
+    #     return jsonify({"mensaje": "Credenciales inválidas"}), 401
+    # access_token = create_access_token(identity=donee.id)
+    return jsonify({"mensaje": "Inicio de sesión exitoso"}), 200
+
+@jwt_required()
+def obtener_usuario():
+    Donee_id = get_jwt_identity()
+    Donee = Donee.query.get(Donee_id)
+    if not Donee:
+        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+        return jsonify({
+        "id": Donee.id,
+         "nombre": Donee.nombre,
+         "email": Donee.email
+     }), 200
+
+@jwt_required()
+def eliminar_usuario(Donee_id):
+    Donee = Donee.query.get(Donee_id)
+    if not Donee:
+        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+    db.session.delete(Donee)
+    db.session.commit()
+    return jsonify({"mensaje": "Usuario eliminado"}), 200

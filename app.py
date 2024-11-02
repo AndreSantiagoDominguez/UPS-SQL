@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from config import config
 from src.routes.doneesRoutes import doneesBlueprint
-from src.models.user import db
+from src.models.donee import db
 
 def create_app():
     app = Flask(__name__)
