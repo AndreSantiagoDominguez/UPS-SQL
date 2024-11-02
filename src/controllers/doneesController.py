@@ -37,7 +37,7 @@ def createDonee(data):
             "details": str(e)
         }), 500
 
-@jwt_required
+
 def updateDonee(id_donee, data):
     try:
         # Buscar el donatario en la base de datos
@@ -46,9 +46,17 @@ def updateDonee(id_donee, data):
         if not donee:
             return jsonify({"error": "Donee not found"}), 404
 
+        if 'credentials' in data:
+            credentials = data['credentials']
+
+            if 'password' in credentials:
+                credentials['password'] = Donee.hashNewPass(credentials['password'])
+
+            setattr(donee, 'credentials', credentials)
+                
         # Actualizar solo los atributos que se proporcionan en el data
         for key, value in data.items():
-            if hasattr(donee, key):
+            if hasattr(donee, key) and key != 'credentials':
                 setattr(donee, key, value)
 
         # Guardar los cambios en la base de datos
@@ -68,23 +76,18 @@ def login(data):
     email = data.get('email')
     password = data.get('password')
 
-    stmt = select(Donee)
+    donee = Donee.query.filter(func.jsonb_extract_path_text(Donee.credentials, 'email') == email).first()
 
-    # Ejecutar la consulta
-    result = db.session.execute(stmt).scalars().all()
+    if not donee:
+        return jsonify({"mensaje": "Credenciales inválidas"}), 401
 
-    # Imprimir los resultados
-    for donee in result:
-        print(donee)
+    if not donee.check_password(password):
+        return jsonify({"mensaje": "Credenciales inválidas"}), 401
+    
+    access_token = create_access_token(identity=donee.id_donee)
+    
+    return jsonify({"mensaje": "Inicio de sesión exitoso", "access_token": access_token}), 200
 
-
-
-    # if not donee:
-    #     return jsonify({"mensaje": "Credenciales inválidas"}), 401
-    # if not donee.check_password(password):
-    #     return jsonify({"mensaje": "Credenciales inválidas"}), 401
-    # access_token = create_access_token(identity=donee.id)
-    return jsonify({"mensaje": "Inicio de sesión exitoso"}), 200
 
 @jwt_required()
 def obtener_usuario():
