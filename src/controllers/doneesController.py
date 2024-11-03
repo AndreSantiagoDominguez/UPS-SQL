@@ -86,10 +86,24 @@ def login(data):
     return jsonify({"mensaje": "Inicio de sesión exitoso", "access_token": access_token}), 200
 
 
-@jwt_required()
 def getDonee():
     donee_id_donee = get_jwt_identity()
     donee = Donee.query.get(donee_id_donee)
+    if not Donee:
+        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+    
+    return jsonify({
+        'id_donee': donee.id_donee,
+        'first_name': donee.first_name,
+        'last_name': donee.last_name,
+        'email': donee.credentials['email'],
+        'address': donee.address,
+        'phone_number': donee.phone_number
+    }), 200
+
+
+def getDoneeById(id_donee):
+    donee = Donee.query.get(id_donee)
     if not Donee:
         return jsonify({"mensaje": "Usuario no encontrado"}), 404
     

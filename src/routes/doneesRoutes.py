@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from src.controllers.doneesController import createDonee, updateDonee, login, getDonee, delete
+from src.controllers.doneesController import createDonee, updateDonee, login, getDonee, delete, getDoneeById
 
 doneesBlueprint = Blueprint('donees', __name__)
 
@@ -21,6 +21,10 @@ def loginR():
 @doneesBlueprint.route('/profile', methods=['GET'])
 def viewProfile():
     return getDonee()
+
+@doneesBlueprint.route('/search/<int:id_donee>', methods=['GET'])
+def search(id_donee):
+    return getDoneeById(id_donee)
 
 @doneesBlueprint.route('/deleteAccount', methods=['DELETE'])
 def deleteAccount():

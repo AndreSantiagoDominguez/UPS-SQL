@@ -85,3 +85,66 @@ def getProfile():
     }
 
     return jsonify(response), 200
+
+def getProfileById(id_donor):
+    donor_profile = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.id_donor == id_donor).first()
+
+    if not donor_profile:
+        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+
+    donor, profile = donor_profile  
+
+    response = {
+        'id_donor': donor.id_donor,
+        'first_name': donor.first_name,
+        'last_name': donor.last_name,
+        'email': donor.credentials['email'],  
+        'address': donor.address,
+        'phone_number': donor.phone_number,
+        'health_status': profile.health_status,
+        'availability': profile.availability,
+        'donations_number': profile.donations_number,
+        'last_donation': profile.last_donation,
+        'blood_type': profile.blood_type
+    }
+
+    return jsonify(response), 200
+
+# Para buscar
+def searchByBloodType(bloodType):
+    donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Profile.blood_type == bloodType).limit(20).all()
+
+    if not donors:
+        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+
+    response_list = []
+    for donor, profile in donors:
+        response = {
+            'id_donor': donor.id_donor,
+            'first_name': donor.first_name,
+            'last_name': donor.last_name,
+            'address': donor.address,
+            'blood_type': profile.blood_type
+        }
+        response_list.append(response)
+
+    return jsonify(response_list), 200
+
+def searchByLocality(locality):
+    donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.address['locality'] == locality).limit(20).all()
+
+    if not donors:
+        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+
+    response_list = []
+    for donor, profile in donors:
+        response = {
+            'id_donor': donor.id_donor,
+            'first_name': donor.first_name,
+            'last_name': donor.last_name,
+            'address': donor.address,
+            'blood_type': profile.blood_type
+        }
+        response_list.append(response)
+
+    return jsonify(response_list), 200
