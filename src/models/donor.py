@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
+from sqlalchemy import JSON
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -17,8 +18,8 @@ class Donor(db.Model):
     id_donor = db.Column(db.Integer, primary_key=True, autoincrement=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
-    credentials = db.Column(db.JSON, nullable=False)  
-    address = db.Column(db.JSON, nullable=False)      
+    credentials = db.Column(JSON, nullable=False) 
+    address = db.Column(JSON, nullable=False)     
     phone_number = db.Column(db.String(10), nullable=False)
 
     def __init__(self, first_name, last_name, email, password, state, locality, distrit, phone_number):
@@ -29,7 +30,12 @@ class Donor(db.Model):
         self.credentials = {'email': email, 'password': bcrypt.generate_password_hash(password).decode('utf-8')}
         
     def check_password(self, password):
-        return bcrypt.check_password_hash(self.credentials['password'], password)
+        passwordOF = self.credentials.get('password')
+        return bcrypt.check_password_hash(passwordOF, password)
+    
+    def hashNewPass(password):
+        return bcrypt.generate_password_hash(password).decode('utf-8')
 
     def __repr__(self):
-        return f'<User {self.first_name}>'
+        email = self.credentials.get('email')
+        return f'User: {self.first_name}, {email}>'
