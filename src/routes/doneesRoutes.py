@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 from src.controllers.doneesController import createDonee, updateDonee, login, getDonee, delete
-from flask_jwt_extended import JWTManager
 
 doneesBlueprint = Blueprint('donees', __name__)
 

@@ -1,8 +1,6 @@
 from datetime import timedelta
-from tokenize import String
-from typing import cast
 from flask import jsonify
-from sqlalchemy import func, select, text
+from sqlalchemy import func
 from src.models.donee import Donee, db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 

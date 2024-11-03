@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
-import json
 from sqlalchemy import JSON
 
 db = SQLAlchemy()
