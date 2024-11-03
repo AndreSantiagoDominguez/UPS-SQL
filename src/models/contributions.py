@@ -12,7 +12,7 @@ load_dotenv()
 class Contributions(db.Model):
 
     schema_name = os.getenv("SCHEMA")
-    __tablename__ = 'profile'
+    __tablename__ = 'contributions'
     __table_args__ = {'schema': schema_name}
 
     id_donor = db.Column(db.Integer, db.ForeignKey('donors.id_donor'), primary_key=True)

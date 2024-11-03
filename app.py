@@ -2,9 +2,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from config import config
+from src.models.donee import db
 from src.routes.doneesRoutes import doneesBlueprint
 from src.routes.donorsRouter import donorsBlueprint
-from src.models.donee import db
+from src.routes.profileRouter import profileBlueprint
+from src.routes.contributionsRouter import contributiosBlueprint
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +15,8 @@ def create_app():
     jwt = JWTManager(app)
     app.register_blueprint(doneesBlueprint, url_prefix="/donees")
     app.register_blueprint(donorsBlueprint, url_prefix="/donors")
+    app.register_blueprint(profileBlueprint, url_prefix="/profile")
+    app.register_blueprint(contributiosBlueprint, url_prefix="/contributions")
     return app
 
 if __name__ == '__main__':
