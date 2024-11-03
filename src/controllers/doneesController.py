@@ -1,3 +1,4 @@
+from datetime import timedelta
 from tokenize import String
 from typing import cast
 from flask import jsonify
@@ -37,7 +38,7 @@ def createDonee(data):
             "details": str(e)
         }), 500
 
-
+@jwt_required
 def updateDonee(id_donee, data):
     try:
         # Buscar el donatario en la base de datos
@@ -84,28 +85,35 @@ def login(data):
     if not donee.check_password(password):
         return jsonify({"mensaje": "Credenciales inválidas"}), 401
     
-    access_token = create_access_token(identity=donee.id_donee)
+    expires = timedelta(hours=2)
+    access_token = create_access_token(identity=donee.id_donee, expires_delta=expires)
     
     return jsonify({"mensaje": "Inicio de sesión exitoso", "access_token": access_token}), 200
 
 
 @jwt_required()
-def obtener_usuario():
-    Donee_id = get_jwt_identity()
-    Donee = Donee.query.get(Donee_id)
+def getDonee():
+    donee_id_donee = get_jwt_identity()
+    donee = Donee.query.get(donee_id_donee)
     if not Donee:
         return jsonify({"mensaje": "Usuario no encontrado"}), 404
-        return jsonify({
-        "id": Donee.id,
-         "nombre": Donee.nombre,
-         "email": Donee.email
-     }), 200
+    
+    return jsonify({
+        'id_donee': donee.id_donee,
+        'first_name': donee.first_name,
+        'last_name': donee.last_name,
+        'email': donee.credentials['email'],
+        'address': donee.address,
+        'phone_number': donee.phone_number
+    }), 200
 
-@jwt_required()
-def eliminar_usuario(Donee_id):
-    Donee = Donee.query.get(Donee_id)
+@jwt_required()  #Cuando quiere dar de baja su cuenta
+def delete():
+    donee_id_donee = get_jwt_identity()
+    donee = Donee.query.get(donee_id_donee)
     if not Donee:
         return jsonify({"mensaje": "Usuario no encontrado"}), 404
-    db.session.delete(Donee)
+    
+    db.session.delete(donee)
     db.session.commit()
-    return jsonify({"mensaje": "Usuario eliminado"}), 200
+    return jsonify({"msg": "Usuario eliminado"}), 200

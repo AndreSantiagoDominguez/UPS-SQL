@@ -39,4 +39,4 @@ class Donee(db.Model):
 
     def __repr__(self):
         email = self.credentials.get('email')
-        return f'<User {self.first_name}, {email}>'
+        return f'User: {self.first_name}, {email}>'
