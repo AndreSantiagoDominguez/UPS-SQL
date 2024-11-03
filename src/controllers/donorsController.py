@@ -6,7 +6,6 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 
 def createDonor(data):
     try:
-        print(data)
         # Obtener los datos
         newDonor = Donor(
             first_name=data['first_name'],
@@ -18,8 +17,6 @@ def createDonor(data):
             distrit=data['distrit'],
             phone_number=data['phone_number']
         )
-
-        print(newDonor)
 
         # Inserción 
         db.session.add(newDonor)
@@ -37,10 +34,11 @@ def createDonor(data):
         }), 500
 
 @jwt_required
-def updateDonor(id_donor, data):
+def updateDonor(data):
     try:
         # Buscar el donatario en la base de datos
-        donor = Donor.query.get(id_donor)
+        donor_id_donor = get_jwt_identity()
+        donor = Donor.query.get(donor_id_donor)
 
         if not donor:
             return jsonify({"error": "Donor not found"}), 404

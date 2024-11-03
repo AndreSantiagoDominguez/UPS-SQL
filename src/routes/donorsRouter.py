@@ -8,10 +8,10 @@ def addDonor():
     data = request.get_json()
     return createDonor(data)
 
-@donorsBlueprint.route('/update/<int:id_donor>', methods=['PUT'])
-def putDonor(id_donor):
+@donorsBlueprint.route('/update', methods=['PUT'])
+def putDonor():
     data = request.get_json()
-    return updateDonor(id_donor, data)
+    return updateDonor(data)
 
 @donorsBlueprint.route('/login', methods=['POST'])
 def loginR():

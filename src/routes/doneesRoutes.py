@@ -8,10 +8,10 @@ def addDonee():
     data = request.get_json()
     return createDonee(data)
 
-@doneesBlueprint.route('/update/<int:id_donee>', methods=['PUT'])
-def putDonee(id_donee):
+@doneesBlueprint.route('/update', methods=['PUT'])
+def putDonee():
     data = request.get_json()
-    return updateDonee(id_donee, data)
+    return updateDonee(data)
 
 @doneesBlueprint.route('/login', methods=['POST'])
 def loginR():
