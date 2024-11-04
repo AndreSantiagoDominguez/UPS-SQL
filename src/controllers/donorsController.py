@@ -33,7 +33,7 @@ def createDonor(data):
             "details": str(e)
         }), 500
 
-@jwt_required
+@jwt_required()
 def updateDonor(data):
     try:
         # Buscar el donatario en la base de datos

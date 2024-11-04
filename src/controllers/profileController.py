@@ -3,7 +3,7 @@ from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-@jwt_required
+@jwt_required()
 def createProfile(data):
     try:
         #Obtener id de la sesion
@@ -33,7 +33,7 @@ def createProfile(data):
             "details": str(e)
         }), 500
 
-@jwt_required
+@jwt_required()
 def updateProfile(data):
     try:
         # Buscar el donatario en la base de datos

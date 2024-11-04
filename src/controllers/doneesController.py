@@ -33,12 +33,12 @@ def createDonee(data):
             "details": str(e)
         }), 500
 
-@jwt_required
+@jwt_required()
 def updateDonee(data):
     try:
         donee_id_donee = get_jwt_identity()
         donee = Donee.query.get(donee_id_donee)
-
+        print(donee)
         if not donee:
             return jsonify({"error": "Donee not found"}), 404
 
@@ -57,10 +57,10 @@ def updateDonee(data):
 
         # Guardar los cambios en la base de datos
         db.session.commit()
-
+        print(donee)
         return jsonify({
             "msg": "Donee updated successfully",
-            "id_donee": donee.id_donee,
+            "id_donee": donee.id_donee
         }), 200
     except Exception as e:
         return jsonify({
@@ -85,7 +85,7 @@ def login(data):
     
     return jsonify({"mensaje": "Inicio de sesión exitoso", "access_token": access_token}), 200
 
-
+@jwt_required()
 def getDonee():
     donee_id_donee = get_jwt_identity()
     donee = Donee.query.get(donee_id_donee)
