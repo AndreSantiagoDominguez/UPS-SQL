@@ -75,7 +75,7 @@ def login(data):
     donee = Donee.query.filter(func.jsonb_extract_path_text(Donee.credentials, 'email') == email).first()
 
     if not donee:
-        return jsonify({"mensaje": "Credenciales inválidas"}), 401
+        return jsonify({"mensaje": "No se entontró"}), 404
 
     if not donee.check_password(password):
         return jsonify({"mensaje": "Credenciales inválidas"}), 401

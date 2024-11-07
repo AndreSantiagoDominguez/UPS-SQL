@@ -1,11 +1,9 @@
 # Importamos las dependencias
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
 from sqlalchemy import JSON
-
-db = SQLAlchemy()
+from src.models.initDB import db
 bcrypt = Bcrypt()
 load_dotenv()  
 

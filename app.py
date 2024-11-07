@@ -2,14 +2,19 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from config import config
-from src.models.donee import db
+from src.models.initDB import db
 from src.routes.doneesRoutes import doneesBlueprint
 from src.routes.donorsRouter import donorsBlueprint
 from src.routes.profileRouter import profileBlueprint
 from src.routes.contributionsRouter import contributiosBlueprint
+from flask_cors import CORS
+
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app)
+
     app.config.from_object(config['development'])
     db.init_app(app)
     jwt = JWTManager(app)
@@ -18,6 +23,7 @@ def create_app():
     app.register_blueprint(profileBlueprint, url_prefix="/profile")
     app.register_blueprint(contributiosBlueprint, url_prefix="/contributions")
     return app
+    
 
 if __name__ == '__main__':
     app = create_app()

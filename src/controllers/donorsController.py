@@ -76,7 +76,7 @@ def login(data):
     donor = Donor.query.filter(func.jsonb_extract_path_text(Donor.credentials, 'email') == email).first()
 
     if not donor:
-        return jsonify({"mensaje": "Credenciales inválidas"}), 401
+        return jsonify({"mensaje": "No se entontró"}), 404
 
     if not donor.check_password(password):
         return jsonify({"mensaje": "Credenciales inválidas"}), 401
