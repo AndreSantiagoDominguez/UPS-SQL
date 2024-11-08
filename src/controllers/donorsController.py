@@ -5,17 +5,20 @@ from src.models.donor import Donor, db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 def createDonor(data):
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    password = data.get('password')
+    phone_number = data.get('phone_number')
+
     try:
         # Obtener los datos
         newDonor = Donor(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            email=data['email'],
-            password=data['password'],
-            state=data['state'],
-            locality=data['locality'],
-            distrit=data['distrit'],
-            phone_number=data['phone_number']
+            first_name,
+            last_name,
+            email,
+            password,
+            phone_number,    
         )
 
         # Inserción 

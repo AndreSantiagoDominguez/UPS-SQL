@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from config import config
-from src.models.initDB import db
+from src.models import db
 from src.routes.doneesRoutes import doneesBlueprint
 from src.routes.donorsRouter import donorsBlueprint
 from src.routes.profileRouter import profileBlueprint

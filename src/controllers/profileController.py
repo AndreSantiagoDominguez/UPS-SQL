@@ -10,14 +10,12 @@ def createProfile(data):
         donor_id_donor = get_jwt_identity()
 
         # Obtener los datos
-        newProfile = Profile(
-            id_donor=donor_id_donor,
-            health_status=data['health_status'],
-            availability=data['availability'],
-            donations_number=data['donations_number'],
-            last_donation=data['last_donation'],
-            blood_type=data['blood_type'],
-        )
+        bloodType = data.get('bloodType')
+
+        if not bloodType:
+            return jsonify({"error": "Falta campo requerido: el tipo de sangre"}), 400
+
+        newProfile = Profile(id_donor=donor_id_donor,bloodType=bloodType)
 
         # Inserción 
         db.session.add(newProfile)
