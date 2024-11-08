@@ -80,7 +80,8 @@ def getProfile():
         'availability': profile.availability,
         'donations_number': profile.donations_number,
         'last_donation': profile.last_donation,
-        'blood_type': profile.blood_type
+        'blood_type': profile.blood_type,
+        'photo': donor.photo
     }
 
     return jsonify(response), 200
@@ -94,6 +95,15 @@ def get_photo():
         donor_id_donor = get_jwt_identity()
         donor = Donor.query.get(donor_id_donor)
         return send_from_directory(app.config['UPLOAD_FOLDER'], donor.photo)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+def getPhotoByName(name):
+    from app import create_app  
+    app = create_app()
+
+    try: 
+        return send_from_directory(app.config['UPLOAD_FOLDER'], name)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -116,7 +126,8 @@ def getProfileById(id_donor):
         'availability': profile.availability,
         'donations_number': profile.donations_number,
         'last_donation': profile.last_donation,
-        'blood_type': profile.blood_type
+        'blood_type': profile.blood_type,
+        'photo': donor.photo
     }
 
     return jsonify(response), 200

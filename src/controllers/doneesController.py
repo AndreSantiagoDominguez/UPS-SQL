@@ -102,7 +102,8 @@ def getDonee():
         'last_name': donee.last_name,
         'email': donee.credentials['email'],
         'address': donee.address,
-        'phone_number': donee.phone_number
+        'phone_number': donee.phone_number,
+        'photo': donee.photo
     }), 200
 
 
@@ -117,7 +118,8 @@ def getDoneeById(id_donee):
         'last_name': donee.last_name,
         'email': donee.credentials['email'],
         'address': donee.address,
-        'phone_number': donee.phone_number
+        'phone_number': donee.phone_number,
+        'photo': donee.photo
     }), 200
 
 @jwt_required()  #Cuando quiere dar de baja su cuenta
@@ -175,5 +177,14 @@ def get_photo():
         donee_id_donee = get_jwt_identity()  
         donee = Donee.query.get(donee_id_donee)
         return send_from_directory(app.config['UPLOAD_FOLDER'], donee.photo)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+def getPhotoByName(name):
+    from app import create_app  
+    app = create_app()
+
+    try: 
+        return send_from_directory(app.config['UPLOAD_FOLDER'], name)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

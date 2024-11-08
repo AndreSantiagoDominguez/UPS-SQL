@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo
+from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo, getPhotoByName
 
 profileBlueprint = Blueprint('profile', __name__)
 
@@ -20,6 +20,10 @@ def viewProfile():
 @profileBlueprint.route('/photo', methods=['GET'])
 def viewPhoto():
     return get_photo()
+
+@profileBlueprint.route('/photo/<string:name>', methods=['GET'])
+def viewPhotoName(name):
+    return getPhotoByName(name)
 
 @profileBlueprint.route('/search/<int:id_donor>', methods=['GET'])
 def search(id_donor):
