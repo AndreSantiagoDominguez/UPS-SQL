@@ -24,8 +24,9 @@ def create_app():
     app.register_blueprint(profileBlueprint, url_prefix="/profile")
     app.register_blueprint(contributiosBlueprint, url_prefix="/contributions")
     return app
-    
+
+# Define app globalmente
+app = create_app()
 
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True)
