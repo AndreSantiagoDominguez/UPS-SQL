@@ -3,19 +3,16 @@ from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-@jwt_required()
 def createProfile(data):
     try:
-        #Obtener id de la sesion
-        donor_id_donor = get_jwt_identity()
-
         # Obtener los datos
         bloodType = data.get('bloodType')
+        id_donor = data.get('id_donor')
 
         if not bloodType:
             return jsonify({"error": "Falta campo requerido: el tipo de sangre"}), 400
 
-        newProfile = Profile(id_donor=donor_id_donor,bloodType=bloodType)
+        newProfile = Profile(id_donor=id_donor,bloodType=bloodType)
 
         # Inserción 
         db.session.add(newProfile)
