@@ -25,7 +25,7 @@ class Donor(db.Model):
     credentials = db.Column(JSON, nullable=False) 
     address = db.Column(JSON, nullable=False, default= directionDefault)     
     phone_number = db.Column(db.String(10), nullable=False, default='0000000000')
-    photo = db.Column(db.String(45), nullable=False, default='photo.png')
+    photo = db.Column(db.String(200), nullable=False, default='photo.png')
 
     def __init__(self, first_name, last_name, email, password, phone_number):
         self.first_name = first_name

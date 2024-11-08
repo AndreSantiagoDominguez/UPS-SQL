@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from src.controllers.donorsController import createDonor, updateDonor, login, delete
+from src.controllers.donorsController import createDonor, updateDonor, login, delete, add_photo
 
 donorsBlueprint = Blueprint('donors', __name__)
 
@@ -21,3 +21,8 @@ def loginR():
 @donorsBlueprint.route('/deleteAccount', methods=['DELETE'])
 def deleteAccount():
     return delete()
+
+@donorsBlueprint.route('/photo', methods=['POST'])
+def addPhoto():
+    data = request.files.get('photo')
+    return add_photo(data)
