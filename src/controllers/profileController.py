@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, send_from_directory
 from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -58,6 +58,7 @@ def updateProfile(data):
             "details": str(e)
         }), 500
 
+@jwt_required()
 def getProfile():
     donor_id_donor = get_jwt_identity()  
 
@@ -83,6 +84,18 @@ def getProfile():
     }
 
     return jsonify(response), 200
+
+@jwt_required()
+def get_photo():
+    from app import create_app  
+    app = create_app()
+
+    try: 
+        donor_id_donor = get_jwt_identity()
+        donor = Donor.query.get(donor_id_donor)
+        return send_from_directory(app.config['UPLOAD_FOLDER'], donor.photo)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def getProfileById(id_donor):
     donor_profile = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.id_donor == id_donor).first()

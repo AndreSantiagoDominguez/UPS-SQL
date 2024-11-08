@@ -1,8 +1,9 @@
 from datetime import timedelta
-from flask import jsonify
+from flask import jsonify, send_from_directory
 from sqlalchemy import func
-from src.models.donee import Donee, db
+from src.models.donee import Donee, db, os
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
 
 def createDonee(data):
     first_name = data.get('first_name')
@@ -129,3 +130,50 @@ def delete():
     db.session.delete(donee)
     db.session.commit()
     return jsonify({"msg": "Usuario eliminado"}), 200
+
+@jwt_required() 
+def add_photo(photo):
+    from app import create_app  
+    app = create_app()
+    try:    
+        if not photo:
+            return jsonify({"error": "No file uploaded"}), 400
+        
+        MAX_FILE_SIZE = 4 * 1024 * 1024  # 4 MB
+
+        file_size = len(photo.read())  # Esto nos da el tamaño del archivo en bytes
+        photo.seek(0) 
+
+        # Verificar si el archivo excede el límite
+        if file_size > MAX_FILE_SIZE:
+           return jsonify({"msg": "El archivo es demasiado grande. El tamaño máximo permitido es de 10 MB."}), 400
+        
+        donee_id_donee = get_jwt_identity()  
+        donee = Donee.query.get(donee_id_donee)
+
+        filename = secure_filename(str(donee.id_donee)+photo.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        photo.save(filepath)
+
+        if not donee:
+            return jsonify({"error": "Donor not found"}), 404
+
+        donee.photo = filename
+        db.session.commit()
+
+        return jsonify({"msg": "Photo uploaded successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@jwt_required()
+def get_photo():
+    from app import create_app  
+    app = create_app()
+
+    try: 
+        donee_id_donee = get_jwt_identity()  
+        donee = Donee.query.get(donee_id_donee)
+        return send_from_directory(app.config['UPLOAD_FOLDER'], donee.photo)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

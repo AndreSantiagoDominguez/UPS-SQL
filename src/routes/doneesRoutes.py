@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from src.controllers.doneesController import createDonee, updateDonee, login, getDonee, delete, getDoneeById
+from src.controllers.doneesController import createDonee, updateDonee, login, getDonee, delete, getDoneeById, add_photo, get_photo
 
 doneesBlueprint = Blueprint('donees', __name__)
 
@@ -29,3 +29,12 @@ def search(id_donee):
 @doneesBlueprint.route('/deleteAccount', methods=['DELETE'])
 def deleteAccount():
     return delete()
+
+@doneesBlueprint.route('/addPhoto', methods=['POST'])
+def addPhoto():
+    data = request.files.get('photo')
+    return add_photo(data)
+
+@doneesBlueprint.route('/photo', methods=['GET'])
+def viewPhoto():
+    return get_photo()
