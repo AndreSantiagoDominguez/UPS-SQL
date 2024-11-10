@@ -14,9 +14,10 @@ class Donor(db.Model):
     __table_args__ = {'schema': schema_name}
 
     directionDefault = {
+        'postal_code': 29000,
         'state': 'state',
         'locality': 'locality',
-        'distrit': 'distrit'
+        'distrit': 'distrit',
     }
 
     id_donor = db.Column(db.Integer, primary_key=True, autoincrement=True)
