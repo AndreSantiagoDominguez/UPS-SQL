@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import jsonify, render_template
+from flask import jsonify
 from sqlalchemy import func
 from src.models.donor import Donor, db, os
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity

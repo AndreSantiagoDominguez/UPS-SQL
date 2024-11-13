@@ -8,6 +8,7 @@ from src.routes.donorsRouter import donorsBlueprint
 from src.routes.profileRouter import profileBlueprint
 from src.routes.contributionsRouter import contributiosBlueprint
 from src.routes.addressRouter import addressBlueprint
+from src.routes.locationsRouter import locationsBlueprint
 from flask_cors import CORS
 
 def create_app():
@@ -25,6 +26,8 @@ def create_app():
     app.register_blueprint(profileBlueprint, url_prefix="/profile")
     app.register_blueprint(contributiosBlueprint, url_prefix="/contributions")
     app.register_blueprint(addressBlueprint, url_prefix="/address")
+    app.register_blueprint(locationsBlueprint, url_prefix="/locations")
+
     return app
 
 # Define app globalmente
