@@ -3,7 +3,8 @@ from flask import jsonify
 from sqlalchemy import func
 from src.models.donor import Donor, db, os
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
+from googleapiclient.http import MediaFileUpload
+from config import drive_service
 
 def createDonor(data):
     first_name = data.get('first_name')
@@ -102,36 +103,22 @@ def delete():
     return jsonify({"msg": "Usuario eliminado"}), 200
 
 @jwt_required() 
-def add_photo(photo):
-    from app import create_app  
-    app = create_app()
-    try:    
-        if not photo:
-            return jsonify({"error": "No file uploaded"}), 400
-        
-        MAX_FILE_SIZE = 4 * 1024 * 1024  # 4 MB
+def upload_to_drive(file_path, file_name):
+    try:
+        file_metadata = {'name': file_name}
+        media = MediaFileUpload(file_path, resumable=True)
+        uploaded_file = drive_service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
 
-        file_size = len(photo.read())  # Esto nos da el tamaño del archivo en bytes
-        photo.seek(0) 
-
-        # Verificar si el archivo excede el límite
-        if file_size > MAX_FILE_SIZE:
-           return jsonify({"msg": "El archivo es demasiado grande. El tamaño máximo permitido es de 10 MB."}), 400
-        
         donor_id_donor = get_jwt_identity()  
         donor = Donor.query.get(donor_id_donor)
 
-        filename = secure_filename(str(donor.id_donor)+photo.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-        photo.save(filepath)
-
-        if not donor:
-            return jsonify({"error": "Donor not found"}), 404
-
-        donor.photo = filename
+        id_photo = uploaded_file.get('id')
+        donor.photo = id_photo
         db.session.commit()
-
-        return jsonify({"msg": "Photo uploaded successfully"}), 200
+        return id_photo
     except Exception as e:
         return jsonify({"error": str(e)}), 500

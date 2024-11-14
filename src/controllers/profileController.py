@@ -2,6 +2,9 @@ from flask import jsonify, send_from_directory
 from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+from io import BytesIO
+from config import drive_service
 
 def createProfile(data):
     try:
@@ -85,22 +88,26 @@ def getProfile():
 
 @jwt_required()
 def get_photo():
-    from app import create_app  
-    app = create_app()
-
     try: 
-        donor_id_donor = get_jwt_identity()
+        donor_id_donor = get_jwt_identity()  
         donor = Donor.query.get(donor_id_donor)
-        return send_from_directory(app.config['UPLOAD_FOLDER'], donor.photo)
+        return download_from_drive(donor.photo)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-def getPhotoByName(name):
-    from app import create_app  
-    app = create_app()
-
+def download_from_drive(file_id):
+    request = drive_service.files().get_media(fileId=file_id)
+    file_data = BytesIO()
+    downloader = MediaIoBaseDownload(file_data, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+    file_data.seek(0)
+    return file_data
+    
+def get_photo_by_name(id_photo):
     try: 
-        return send_from_directory(app.config['UPLOAD_FOLDER'], name)
+        return download_from_drive(id_photo)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

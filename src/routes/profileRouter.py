@@ -1,5 +1,5 @@
-from flask import Blueprint, request
-from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo, getPhotoByName
+from flask import Blueprint, request, send_file
+from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo
 
 profileBlueprint = Blueprint('profile', __name__)
 
@@ -18,12 +18,14 @@ def viewProfile():
     return getProfile()
 
 @profileBlueprint.route('/photo', methods=['GET'])
-def viewPhoto():
-    return get_photo()
+def download_drive():
+    file_data = get_photo()
+    return send_file(file_data, mimetype='image/jpeg')
 
-@profileBlueprint.route('/photo/<string:name>', methods=['GET'])
+@profileBlueprint.route('/photo/<string:id_photo>', methods=['GET'])
 def viewPhotoName(name):
-    return getPhotoByName(name)
+    file_data = get_photo(name)
+    return send_file(file_data, mimetype='image/jpeg')
 
 @profileBlueprint.route('/search/<int:id_donor>', methods=['GET'])
 def search(id_donor):

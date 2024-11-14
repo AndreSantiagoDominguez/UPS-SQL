@@ -4,6 +4,9 @@ from sqlalchemy import func
 from src.models.donee import Donee, db, os
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+from io import BytesIO
+from config import drive_service
 
 def createDonee(data):
     first_name = data.get('first_name')
@@ -134,57 +137,47 @@ def delete():
     return jsonify({"msg": "Usuario eliminado"}), 200
 
 @jwt_required() 
-def add_photo(photo):
-    from app import create_app  
-    app = create_app()
-    try:    
-        if not photo:
-            return jsonify({"error": "No file uploaded"}), 400
-        
-        MAX_FILE_SIZE = 4 * 1024 * 1024  # 4 MB
+def upload_to_drive(file_path, file_name):
+    try:
+        file_metadata = {'name': file_name}
+        media = MediaFileUpload(file_path, resumable=True)
+        uploaded_file = drive_service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
 
-        file_size = len(photo.read())  # Esto nos da el tamaño del archivo en bytes
-        photo.seek(0) 
-
-        # Verificar si el archivo excede el límite
-        if file_size > MAX_FILE_SIZE:
-           return jsonify({"msg": "El archivo es demasiado grande. El tamaño máximo permitido es de 10 MB."}), 400
-        
         donee_id_donee = get_jwt_identity()  
         donee = Donee.query.get(donee_id_donee)
 
-        filename = secure_filename(str(donee.id_donee)+photo.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-        photo.save(filepath)
-
-        if not donee:
-            return jsonify({"error": "Donor not found"}), 404
-
-        donee.photo = filename
+        id_photo = uploaded_file.get('id')
+        donee.photo = id_photo
         db.session.commit()
-
-        return jsonify({"msg": "Photo uploaded successfully"}), 200
+        return id_photo
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
 @jwt_required()
 def get_photo():
-    from app import create_app  
-    app = create_app()
-
     try: 
         donee_id_donee = get_jwt_identity()  
         donee = Donee.query.get(donee_id_donee)
-        return send_from_directory(app.config['UPLOAD_FOLDER'], donee.photo)
+        return download_from_drive(donee.photo)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-def getPhotoByName(name):
-    from app import create_app  
-    app = create_app()
-
+def download_from_drive(file_id):
+    request = drive_service.files().get_media(fileId=file_id)
+    file_data = BytesIO()
+    downloader = MediaIoBaseDownload(file_data, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+    file_data.seek(0)
+    return file_data
+    
+def get_photo_by_name(id_photo):
     try: 
-        return send_from_directory(app.config['UPLOAD_FOLDER'], name)
+        return download_from_drive(id_photo)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

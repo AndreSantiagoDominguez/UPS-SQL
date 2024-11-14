@@ -1,5 +1,7 @@
-from flask import Blueprint, request
-from src.controllers.donorsController import createDonor, updateDonor, login, delete, add_photo
+import os
+import tempfile
+from flask import Blueprint, jsonify, request
+from src.controllers.donorsController import createDonor, updateDonor, login, delete, upload_to_drive
 
 donorsBlueprint = Blueprint('donors', __name__)
 
@@ -22,7 +24,30 @@ def loginR():
 def deleteAccount():
     return delete()
 
-@donorsBlueprint.route('/photo', methods=['POST'])
-def addPhoto():
-    data = request.files.get('photo')
-    return add_photo(data)
+@donorsBlueprint.route('/addPhoto', methods=['POST'])
+def upload_drive():
+    if 'photo' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    file = request.files['photo']
+    file_name = file.filename
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, file_name)      #f'/tmp/{file_name}'
+    file.save(file_path)
+
+    file_id = upload_to_drive(file_path, file_name)
+    google_drive_url = file_id  # f"https://drive.google.com/uc?id={file_id}"
+
+    # Guardar el file_id en un archivo JSON
+    # data = {}
+    # if os.path.exists('file_ids.json'):
+    #     with open('file_ids.json', 'r') as f:
+    #         data = json.load(f)
+
+    # data[file_name] = file_id
+    # with open('file_ids.json', 'w') as f:
+    #     json.dump(data, f)
+
+    os.remove(file_path)
+
+    return jsonify({'google_drive_url': google_drive_url}), 200

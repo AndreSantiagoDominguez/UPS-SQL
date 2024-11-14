@@ -17,7 +17,6 @@ def create_app():
     CORS(app)
 
     app.config.from_object(config['development'])
-    app.config['UPLOAD_FOLDER'] = './photos'
     
     db.init_app(app)
     jwt = JWTManager(app)
