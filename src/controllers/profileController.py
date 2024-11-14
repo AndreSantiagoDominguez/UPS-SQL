@@ -198,37 +198,45 @@ def searchByCompatibility(type):
 
 def caseAp():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_ap()")
-    return response(query)
+    compatibility = ['A+','A-','O+','O-']
+    return response(query, compatibility)
 
 def caseAn():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_an()")
-    return response(query)
+    compatibility = ['A-','O-']
+    return response(query, compatibility)
 
 def caseBp():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_bp()")
-    return response(query)
+    compatibility = ['B+','B-','O+','O-']
+    return response(query, compatibility)
 
 def caseBn():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_bn()")
-    return response(query)
+    compatibility = ['B-','O-']
+    return response(query, compatibility)
 
 def caseABp():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_abp()")
-    return response(query)
+    compatibility = ['All']
+    return response(query, compatibility)
 
 def caseABn():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_abn()")
-    return response(query)
+    compatibility = ['A-','B-','AB-','O-']
+    return response(query, compatibility)
 
 def caseOp():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_op()")
-    return response(query)
+    compatibility = ['O+','O-']
+    return response(query, compatibility)
 
 def caseOn():
     query = text(f"SELECT * FROM upsjson.get_compatible_donors_on()")
-    return response(query)
+    compatibility = ['O-']
+    return response(query, compatibility)
 
-def response(query):
+def response(query, compatibility):
     result = db.session.execute(query)
     
     # Recuperar los resultados
@@ -243,6 +251,7 @@ def response(query):
             'first_name': donor[1],
             'last_name': donor[2],
             'address': donor[3],
-            'blood_type': donor[4]
+            'blood_type': donor[4],
+            'compatibility': compatibility
         })
     return jsonify(donors_list), 200
