@@ -1,4 +1,5 @@
 from flask import jsonify, send_from_directory
+from sqlalchemy import func
 from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -157,10 +158,16 @@ def searchByBloodType(bloodType):
     return jsonify(response_list), 200
 
 def searchByLocality(locality):
-    donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.address['locality'] == locality).limit(20).all()
+    donors = (
+        db.session.query(Donor, Profile)
+        .filter(Donor.id_donor == Profile.id_donor)
+        .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
+        .limit(20)
+        .all()
+    )
 
     if not donors:
-        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+        return jsonify({"mensaje": "No se encontraron donadores en esta localidad"}), 404
 
     response_list = []
     for donor, profile in donors:

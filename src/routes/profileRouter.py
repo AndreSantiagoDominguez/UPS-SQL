@@ -32,9 +32,9 @@ def search(id_donor):
     return getProfileById(id_donor)
 
 @profileBlueprint.route('/searchByLocality/<string:locality>', methods=['GET'])
-def searchByLocality(locality):
+def ByLocality(locality):
     return searchByLocality(locality)
 
 @profileBlueprint.route('/searchByBlood/<string:type>', methods=['GET'])
-def searchByBlood(bloodtype):
-    return searchByBloodType(bloodtype)
+def searchByBlood(type):
+    return searchByBloodType(type)

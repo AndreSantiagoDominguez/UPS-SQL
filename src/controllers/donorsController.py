@@ -122,3 +122,14 @@ def upload_to_drive(file_path, file_name):
         return id_photo
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def getLocalities():
+    try:
+        localitiesResponse = db.session.query(
+            func.jsonb_extract_path_text(Donor.address, 'locality').label('locality')
+        ).group_by(func.jsonb_extract_path_text(Donor.address, 'locality'))
+        
+        localities = [{'locality': locality} for (locality,) in localitiesResponse]
+        return jsonify(localities)
+    except Exception as e:
+        return jsonify({ 'error': str(e)})

@@ -1,7 +1,7 @@
 import os
 import tempfile
 from flask import Blueprint, jsonify, request
-from src.controllers.donorsController import createDonor, updateDonor, login, delete, upload_to_drive
+from src.controllers.donorsController import createDonor, updateDonor, login, delete, upload_to_drive, getLocalities
 
 donorsBlueprint = Blueprint('donors', __name__)
 
@@ -51,3 +51,7 @@ def upload_drive():
     os.remove(file_path)
 
     return jsonify({'google_drive_url': google_drive_url}), 200
+
+@donorsBlueprint.route('/localities', methods=['GET'])
+def getAllLocalities():
+    return getLocalities()
