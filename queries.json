@@ -1,0 +1,10 @@
+{
+  "A+": "SELECT * FROM upsjson.get_compatible_donors_ap()",
+  "A-": "SELECT * FROM upsjson.get_compatible_donors_an()",
+  "B+": "SELECT * FROM upsjson.get_compatible_donors_bp()",
+  "B-": "SELECT * FROM upsjson.get_compatible_donors_bn()",
+  "AB+": "SELECT * FROM upsjson.get_compatible_donors_abp()",
+  "AB-": "SELECT * FROM upsjson.get_compatible_donors_abn()",
+  "O+": "SELECT * FROM upsjson.get_compatible_donors_op()",
+  "O-": "SELECT * FROM upsjson.get_compatible_donors_on()"
+}

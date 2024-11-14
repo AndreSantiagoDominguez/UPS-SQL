@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from io import BytesIO
 from config import drive_service
+import json
 
 def createProfile(data):
     try:
@@ -151,7 +152,8 @@ def searchByBloodType(bloodType):
             'first_name': donor.first_name,
             'last_name': donor.last_name,
             'address': donor.address,
-            'blood_type': profile.blood_type
+            'blood_type': profile.blood_type,
+            'compatibility': compatibilityBlood(profile.blood_type)
         }
         response_list.append(response)
 
@@ -176,11 +178,16 @@ def searchByLocality(locality):
             'first_name': donor.first_name,
             'last_name': donor.last_name,
             'address': donor.address,
-            'blood_type': profile.blood_type
+            'blood_type': profile.blood_type,
+            'compatibility': compatibilityBlood(profile.blood_type)
         }
         response_list.append(response)
 
     return jsonify(response_list), 200
+
+
+with open('queries.json', 'r') as file:
+    queries = json.load(file)
 
 def searchByCompatibility(type):
     switch = {
@@ -197,46 +204,38 @@ def searchByCompatibility(type):
     return switch.get(type)()
 
 def caseAp():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_ap()")
-    compatibility = ['A+','A-','O+','O-']
-    return response(query, compatibility)
+    query = text(queries['A+'])
+    return response(query)
 
 def caseAn():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_an()")
-    compatibility = ['A-','O-']
-    return response(query, compatibility)
+    query = text(queries['A-'])
+    return response(query)
 
 def caseBp():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_bp()")
-    compatibility = ['B+','B-','O+','O-']
-    return response(query, compatibility)
+    query = text(queries['B+'])
+    return response(query)
 
 def caseBn():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_bn()")
-    compatibility = ['B-','O-']
-    return response(query, compatibility)
+    query = text(queries['B-'])
+    return response(query)
 
 def caseABp():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_abp()")
-    compatibility = ['All']
-    return response(query, compatibility)
+    query = text(queries['AB+'])
+    return response(query)
 
 def caseABn():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_abn()")
-    compatibility = ['A-','B-','AB-','O-']
-    return response(query, compatibility)
+    query = text(queries['AB-'])
+    return response(query)
 
 def caseOp():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_op()")
-    compatibility = ['O+','O-']
-    return response(query, compatibility)
+    query = text(queries['O+'])
+    return response(query)
 
 def caseOn():
-    query = text(f"SELECT * FROM upsjson.get_compatible_donors_on()")
-    compatibility = ['O-']
-    return response(query, compatibility)
+    query = text(queries['O-'])
+    return response(query)
 
-def response(query, compatibility):
+def response(query):
     result = db.session.execute(query)
     
     # Recuperar los resultados
@@ -246,6 +245,7 @@ def response(query, compatibility):
         return jsonify({"mensaje": "No se encontraron donadores compatibles"}), 404
     donors_list = []
     for donor in donors:
+        compatibility = compatibilityBlood(donor[4])
         donors_list.append({
             'id_donor': donor[0],
             'first_name': donor[1],
@@ -255,3 +255,21 @@ def response(query, compatibility):
             'compatibility': compatibility
         })
     return jsonify(donors_list), 200
+
+def compatibilityBlood(type):
+    if(type == 'A+'):
+        return ['A+','A-','O+','O-']
+    if(type == 'A-'):
+        return ['A-','O-']
+    if(type == 'B+'):
+        return ['B+','B-','O+','O-']
+    if(type == 'B-'):
+        return ['B-','O-']
+    if(type == 'AB+'):
+        return ['All'] 
+    if(type == 'AB-'):
+        return ['A-','B-','AB-','O-']
+    if(type == 'O+'):
+        return ['O+','O-']
+    if(type == 'O-'):
+        return ['O-']   
