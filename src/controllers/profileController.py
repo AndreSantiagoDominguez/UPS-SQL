@@ -1,5 +1,5 @@
 from flask import jsonify, send_from_directory
-from sqlalchemy import func
+from sqlalchemy import func, text
 from src.models.profile import Profile, db
 from src.models.donor import Donor
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -181,3 +181,68 @@ def searchByLocality(locality):
         response_list.append(response)
 
     return jsonify(response_list), 200
+
+def searchByCompatibility(type):
+    switch = {
+        'A+': caseAp,
+        'A-': caseAn,
+        'B+': caseBp,
+        'B-': caseBn,
+        'AB+': caseABp,
+        'AB-': caseABn,
+        'O+': caseOp,
+        'O-': caseOn,
+    }
+    
+    return switch.get(type)()
+
+def caseAp():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_ap()")
+    return response(query)
+
+def caseAn():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_an()")
+    return response(query)
+
+def caseBp():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_bp()")
+    return response(query)
+
+def caseBn():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_bn()")
+    return response(query)
+
+def caseABp():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_abp()")
+    return response(query)
+
+def caseABn():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_abn()")
+    return response(query)
+
+def caseOp():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_op()")
+    return response(query)
+
+def caseOn():
+    query = text(f"SELECT * FROM upsjson.get_compatible_donors_on()")
+    return response(query)
+
+def response(query):
+    result = db.session.execute(query)
+    
+    # Recuperar los resultados
+    donors = result.fetchall()
+
+    if not donors:
+        return jsonify({"mensaje": "No se encontraron donadores compatibles"}), 404
+    donors_list = []
+    for donor in donors:
+        donors_list.append({
+            'id_donor': donor[0],
+            'first_name': donor[1],
+            'last_name': donor[2],
+            'address': donor[3],
+            'blood_type': donor[4]
+        })
+    return jsonify(donors_list), 200

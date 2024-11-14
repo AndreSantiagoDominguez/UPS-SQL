@@ -1,5 +1,5 @@
 from flask import Blueprint, request, send_file
-from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo
+from src.controllers.profileController import createProfile, updateProfile, getProfile, getProfileById, searchByBloodType, searchByLocality, get_photo, searchByCompatibility
 
 profileBlueprint = Blueprint('profile', __name__)
 
@@ -38,3 +38,7 @@ def ByLocality(locality):
 @profileBlueprint.route('/searchByBlood/<string:type>', methods=['GET'])
 def searchByBlood(type):
     return searchByBloodType(type)
+
+@profileBlueprint.route('/searchByCompatibility/<string:type>', methods=['GET'])
+def ByCompatibility(type):
+    return searchByCompatibility(type)
