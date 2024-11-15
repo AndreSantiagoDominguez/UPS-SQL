@@ -43,12 +43,12 @@ def searchByBlood(type):
 def ByCompatibility(type):
     return searchByCompatibility(type)
 
-@profileBlueprint.route('/CompatibilityLocality', methods=['GET'])
+@profileBlueprint.route('/CompatibilityLocality', methods=['POST'])
 def ByCompatibilityLocality():
     data = request.get_json()
     return searchByCompatibilityLocality(data)
 
-@profileBlueprint.route('/BloodLocality', methods=['GET'])
+@profileBlueprint.route('/BloodLocality', methods=['POST'])
 def ByBloodLocality():
     data = request.get_json()
     return searchByBloodLocality(data)

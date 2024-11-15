@@ -249,14 +249,14 @@ with open('queries.json', 'r') as file:
 def searchByCompatibility(type):
     try:
         switch = {
-            'A+': caseAp,
-            'A-': caseAn,
-            'B+': caseBp,
-            'B-': caseBn,
-            'AB+': caseABp,
-            'AB-': caseABn,
-            'O+': caseOp,
-            'O-': caseOn,
+            'A+': caseAp(None),
+            'A-': caseAn(None),
+            'B+': caseBp(None),
+            'B-': caseBn(None),
+            'AB+': caseABp(None),
+            'AB-': caseABn(None),
+            'O+': caseOp(None),
+            'O-': caseOn(None),
         }
         
         return switch.get(type)
@@ -269,49 +269,49 @@ def searchByCompatibility(type):
 def caseAp(locality):
     query = text(queries['A+'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseAn(locality):
     query = text(queries['A-'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseBp(locality):
     query = text(queries['B+'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseBn(locality):
     query = text(queries['B-'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseABp(locality):
     query = text(queries['AB+'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseABn(locality):
     query = text(queries['AB-'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseOp(locality):
     query = text(queries['O+'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def caseOn(locality):
     query = text(queries['O-'])
     if not locality:
-        return response(query)
+        return response(query, locality)
     return response(query, locality) 
 
 def response(query, locality):
