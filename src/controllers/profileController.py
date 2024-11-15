@@ -159,6 +159,34 @@ def searchByBloodType(bloodType):
 
     return jsonify(response_list), 200
 
+def searchByBloodLocality(data):
+    bloodType = data.get('blood_type')
+    locality = data.get('locality')
+
+    donors = (
+        db.session.query(Donor, Profile)
+        .filter(Donor.id_donor == Profile.id_donor)
+        .filter(Profile.blood_type == bloodType)
+        .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
+        .limit(20).all())
+
+    if not donors:
+        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+
+    response_list = []
+    for donor, profile in donors:
+        response = {
+            'id_donor': donor.id_donor,
+            'first_name': donor.first_name,
+            'last_name': donor.last_name,
+            'address': donor.address,
+            'blood_type': profile.blood_type,
+            'compatibility': compatibilityBlood(profile.blood_type)
+        }
+        response_list.append(response)
+
+    return jsonify(response_list), 200
+
 def searchByLocality(locality):
     donors = (
         db.session.query(Donor, Profile)
@@ -203,57 +231,83 @@ def searchByCompatibility(type):
     
     return switch.get(type)()
 
-def caseAp():
+def caseAp(locality):
     query = text(queries['A+'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseAn():
+def caseAn(locality):
     query = text(queries['A-'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseBp():
+def caseBp(locality):
     query = text(queries['B+'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseBn():
+def caseBn(locality):
     query = text(queries['B-'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseABp():
+def caseABp(locality):
     query = text(queries['AB+'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseABn():
+def caseABn(locality):
     query = text(queries['AB-'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseOp():
+def caseOp(locality):
     query = text(queries['O+'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def caseOn():
+def caseOn(locality):
     query = text(queries['O-'])
-    return response(query)
+    if not locality:
+        return response(query)
+    return response(query, locality) 
 
-def response(query):
+def response(query, locality):
     result = db.session.execute(query)
-    
     # Recuperar los resultados
     donors = result.fetchall()
-
+    
     if not donors:
-        return jsonify({"mensaje": "No se encontraron donadores compatibles"}), 404
+            return jsonify({"mensaje": "No se encontraron donadores compatibles"}), 404
+    
     donors_list = []
     for donor in donors:
-        compatibility = compatibilityBlood(donor[4])
+        address = json.loads(donor[3]) if isinstance(donor[3], str) else donor[3]
         donors_list.append({
             'id_donor': donor[0],
             'first_name': donor[1],
             'last_name': donor[2],
-            'address': donor[3],
+            'address': address,
             'blood_type': donor[4],
-            'compatibility': compatibility
+            'compatibility': compatibilityBlood(donor[4])
         })
+
+    if locality:
+        filtered_donors = [
+            donor for donor in donors_list
+            if donor['address'].get('locality') == locality
+        ]
+        if not filtered_donors:
+            return jsonify({"mensaje": "No se encontraron usuarios con esa localidad"}), 404
+        return jsonify(filtered_donors), 200       
+    
     return jsonify(donors_list), 200
 
 def compatibilityBlood(type):
@@ -273,3 +327,20 @@ def compatibilityBlood(type):
         return ['O+','O-']
     if(type == 'O-'):
         return ['O-']   
+    
+def searchByCompatibilityLocality(data):
+    bloodType = data.get('blood_type')
+    locality = data.get('locality')
+    
+    switch = {
+        'A+': caseAp(locality),
+        'A-': caseAn(locality),
+        'B+': caseBp(locality),
+        'B-': caseBn(locality),
+        'AB+': caseABp(locality),
+        'AB-': caseABn(locality),
+        'O+': caseOp(locality),
+        'O-': caseOn(locality),
+    }
+    
+    return switch.get(bloodType)
