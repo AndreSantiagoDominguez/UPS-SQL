@@ -94,21 +94,26 @@ def login(data):
 
 @jwt_required()
 def getDonee():
-    donee_id_donee = get_jwt_identity()
-    donee = Donee.query.get(donee_id_donee)
-    if not Donee:
-        return jsonify({"mensaje": "Usuario no encontrado"}), 404
-    
-    return jsonify({
-        'id_donee': donee.id_donee,
-        'first_name': donee.first_name,
-        'last_name': donee.last_name,
-        'email': donee.credentials['email'],
-        'address': donee.address,
-        'phone_number': donee.phone_number,
-        'photo': donee.photo
-    }), 200
-
+    try: 
+        donee_id_donee = get_jwt_identity()
+        donee = Donee.query.get(donee_id_donee)
+        if not Donee:
+            return jsonify({"mensaje": "Usuario no encontrado"}), 404
+        
+        return jsonify({
+            'id_donee': donee.id_donee,
+            'first_name': donee.first_name,
+            'last_name': donee.last_name,
+            'email': donee.credentials['email'],
+            'address': donee.address,
+            'phone_number': donee.phone_number,
+            'photo': donee.photo
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 def getDoneeById(id_donee):
     donee = Donee.query.get(id_donee)
@@ -127,14 +132,20 @@ def getDoneeById(id_donee):
 
 @jwt_required()  #Cuando quiere dar de baja su cuenta
 def delete():
-    donee_id_donee = get_jwt_identity()
-    donee = Donee.query.get(donee_id_donee)
-    if not Donee:
-        return jsonify({"mensaje": "Usuario no encontrado"}), 404
-    
-    db.session.delete(donee)
-    db.session.commit()
-    return jsonify({"msg": "Usuario eliminado"}), 200
+    try:
+        donee_id_donee = get_jwt_identity()
+        donee = Donee.query.get(donee_id_donee)
+        if not Donee:
+            return jsonify({"mensaje": "Usuario no encontrado"}), 404
+        
+        db.session.delete(donee)
+        db.session.commit()
+        return jsonify({"msg": "Usuario eliminado"}), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 @jwt_required() 
 def upload_to_drive(file_path, file_name):
@@ -167,14 +178,20 @@ def get_photo():
         return jsonify({"error": str(e)}), 500
     
 def download_from_drive(file_id):
-    request = drive_service.files().get_media(fileId=file_id)
-    file_data = BytesIO()
-    downloader = MediaIoBaseDownload(file_data, request)
-    done = False
-    while not done:
-        status, done = downloader.next_chunk()
-    file_data.seek(0)
-    return file_data
+    try:
+        request = drive_service.files().get_media(fileId=file_id)
+        file_data = BytesIO()
+        downloader = MediaIoBaseDownload(file_data, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+        file_data.seek(0)
+        return file_data
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
     
 def get_photo_by_name(id_photo):
     try: 

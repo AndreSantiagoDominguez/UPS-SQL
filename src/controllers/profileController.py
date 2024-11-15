@@ -62,31 +62,37 @@ def updateProfile(data):
 
 @jwt_required()
 def getProfile():
-    donor_id_donor = get_jwt_identity()  
+    try: 
+        donor_id_donor = get_jwt_identity()  
 
-    donor_profile = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.id_donor == donor_id_donor).first()
+        donor_profile = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Donor.id_donor == donor_id_donor).first()
 
-    if not donor_profile:
-        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+        if not donor_profile:
+            return jsonify({"mensaje": "Usuario no encontrado"}), 404
 
-    donor, profile = donor_profile  
+        donor, profile = donor_profile  
 
-    response = {
-        'id_donor': donor.id_donor,
-        'first_name': donor.first_name,
-        'last_name': donor.last_name,
-        'email': donor.credentials['email'],  
-        'address': donor.address,
-        'phone_number': donor.phone_number,
-        'health_status': profile.health_status,
-        'availability': profile.availability,
-        'donations_number': profile.donations_number,
-        'last_donation': profile.last_donation,
-        'blood_type': profile.blood_type,
-        'photo': donor.photo
-    }
+        response = {
+            'id_donor': donor.id_donor,
+            'first_name': donor.first_name,
+            'last_name': donor.last_name,
+            'email': donor.credentials['email'],  
+            'address': donor.address,
+            'phone_number': donor.phone_number,
+            'health_status': profile.health_status,
+            'availability': profile.availability,
+            'donations_number': profile.donations_number,
+            'last_donation': profile.last_donation,
+            'blood_type': profile.blood_type,
+            'photo': donor.photo
+        }
 
-    return jsonify(response), 200
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 @jwt_required()
 def get_photo():
@@ -98,14 +104,20 @@ def get_photo():
         return jsonify({"error": str(e)}), 500
     
 def download_from_drive(file_id):
-    request = drive_service.files().get_media(fileId=file_id)
-    file_data = BytesIO()
-    downloader = MediaIoBaseDownload(file_data, request)
-    done = False
-    while not done:
-        status, done = downloader.next_chunk()
-    file_data.seek(0)
-    return file_data
+    try: 
+        request = drive_service.files().get_media(fileId=file_id)
+        file_data = BytesIO()
+        downloader = MediaIoBaseDownload(file_data, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+        file_data.seek(0)
+        return file_data
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
     
 def get_photo_by_name(id_photo):
     try: 
@@ -140,96 +152,119 @@ def getProfileById(id_donor):
 
 # Para buscar
 def searchByBloodType(bloodType):
-    donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Profile.blood_type == bloodType).limit(20).all()
+    try:
+        donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Profile.blood_type == bloodType).limit(20).all()
 
-    if not donors:
-        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+        if not donors:
+            return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
 
-    response_list = []
-    for donor, profile in donors:
-        response = {
-            'id_donor': donor.id_donor,
-            'first_name': donor.first_name,
-            'last_name': donor.last_name,
-            'address': donor.address,
-            'blood_type': profile.blood_type,
-            'compatibility': compatibilityBlood(profile.blood_type)
-        }
-        response_list.append(response)
+        response_list = []
+        for donor, profile in donors:
+            response = {
+                'id_donor': donor.id_donor,
+                'first_name': donor.first_name,
+                'last_name': donor.last_name,
+                'address': donor.address,
+                'blood_type': profile.blood_type,
+                'compatibility': compatibilityBlood(profile.blood_type)
+            }
+            response_list.append(response)
 
-    return jsonify(response_list), 200
+        return jsonify(response_list), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 def searchByBloodLocality(data):
-    bloodType = data.get('blood_type')
-    locality = data.get('locality')
+    try:
+        bloodType = data.get('blood_type')
+        locality = data.get('locality')
 
-    donors = (
-        db.session.query(Donor, Profile)
-        .filter(Donor.id_donor == Profile.id_donor)
-        .filter(Profile.blood_type == bloodType)
-        .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
-        .limit(20).all())
+        donors = (
+            db.session.query(Donor, Profile)
+            .filter(Donor.id_donor == Profile.id_donor)
+            .filter(Profile.blood_type == bloodType)
+            .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
+            .limit(20).all())
 
-    if not donors:
-        return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
+        if not donors:
+            return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
 
-    response_list = []
-    for donor, profile in donors:
-        response = {
-            'id_donor': donor.id_donor,
-            'first_name': donor.first_name,
-            'last_name': donor.last_name,
-            'address': donor.address,
-            'blood_type': profile.blood_type,
-            'compatibility': compatibilityBlood(profile.blood_type)
-        }
-        response_list.append(response)
+        response_list = []
+        for donor, profile in donors:
+            response = {
+                'id_donor': donor.id_donor,
+                'first_name': donor.first_name,
+                'last_name': donor.last_name,
+                'address': donor.address,
+                'blood_type': profile.blood_type,
+                'compatibility': compatibilityBlood(profile.blood_type)
+            }
+            response_list.append(response)
 
-    return jsonify(response_list), 200
+        return jsonify(response_list), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 def searchByLocality(locality):
-    donors = (
-        db.session.query(Donor, Profile)
-        .filter(Donor.id_donor == Profile.id_donor)
-        .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
-        .limit(20)
-        .all()
-    )
+    try:
+        donors = (
+            db.session.query(Donor, Profile)
+            .filter(Donor.id_donor == Profile.id_donor)
+            .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
+            .limit(20)
+            .all()
+        )
 
-    if not donors:
-        return jsonify({"mensaje": "No se encontraron donadores en esta localidad"}), 404
+        if not donors:
+            return jsonify({"mensaje": "No se encontraron donadores en esta localidad"}), 404
 
-    response_list = []
-    for donor, profile in donors:
-        response = {
-            'id_donor': donor.id_donor,
-            'first_name': donor.first_name,
-            'last_name': donor.last_name,
-            'address': donor.address,
-            'blood_type': profile.blood_type,
-            'compatibility': compatibilityBlood(profile.blood_type)
-        }
-        response_list.append(response)
+        response_list = []
+        for donor, profile in donors:
+            response = {
+                'id_donor': donor.id_donor,
+                'first_name': donor.first_name,
+                'last_name': donor.last_name,
+                'address': donor.address,
+                'blood_type': profile.blood_type,
+                'compatibility': compatibilityBlood(profile.blood_type)
+            }
+            response_list.append(response)
 
-    return jsonify(response_list), 200
-
+        return jsonify(response_list), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 with open('queries.json', 'r') as file:
     queries = json.load(file)
 
 def searchByCompatibility(type):
-    switch = {
-        'A+': caseAp,
-        'A-': caseAn,
-        'B+': caseBp,
-        'B-': caseBn,
-        'AB+': caseABp,
-        'AB-': caseABn,
-        'O+': caseOp,
-        'O-': caseOn,
-    }
-    
-    return switch.get(type)()
+    try:
+        switch = {
+            'A+': caseAp,
+            'A-': caseAn,
+            'B+': caseBp,
+            'B-': caseBn,
+            'AB+': caseABp,
+            'AB-': caseABn,
+            'O+': caseOp,
+            'O-': caseOn,
+        }
+        
+        return switch.get(type)
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
 
 def caseAp(locality):
     query = text(queries['A+'])
@@ -329,18 +364,24 @@ def compatibilityBlood(type):
         return ['O-']   
     
 def searchByCompatibilityLocality(data):
-    bloodType = data.get('blood_type')
-    locality = data.get('locality')
-    
-    switch = {
-        'A+': caseAp(locality),
-        'A-': caseAn(locality),
-        'B+': caseBp(locality),
-        'B-': caseBn(locality),
-        'AB+': caseABp(locality),
-        'AB-': caseABn(locality),
-        'O+': caseOp(locality),
-        'O-': caseOn(locality),
-    }
-    
-    return switch.get(bloodType)
+    try:
+        bloodType = data.get('blood_type')
+        locality = data.get('locality')
+        
+        switch = {
+            'A+': caseAp(locality),
+            'A-': caseAn(locality),
+            'B+': caseBp(locality),
+            'B-': caseBn(locality),
+            'AB+': caseABp(locality),
+            'AB-': caseABn(locality),
+            'O+': caseOp(locality),
+            'O-': caseOn(locality),
+        }
+        
+        return switch.get(bloodType)
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500

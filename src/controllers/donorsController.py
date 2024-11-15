@@ -93,15 +93,21 @@ def login(data):
 
 @jwt_required()  #Cuando quiere dar de baja su cuenta
 def delete():
-    donor_id_donor = get_jwt_identity()
-    donor = Donor.query.get(donor_id_donor)
-    if not Donor:
-        return jsonify({"mensaje": "Usuario no encontrado"}), 404
+    try:
+        donor_id_donor = get_jwt_identity()
+        donor = Donor.query.get(donor_id_donor)
+        if not Donor:
+            return jsonify({"mensaje": "Usuario no encontrado"}), 404
+        
+        db.session.delete(donor)
+        db.session.commit()
+        return jsonify({"msg": "Usuario eliminado"}), 200
+    except Exception as e:
+        return jsonify({
+            "error": "An unexpected error occurred",
+            "details": str(e)
+        }), 500
     
-    db.session.delete(donor)
-    db.session.commit()
-    return jsonify({"msg": "Usuario eliminado"}), 200
-
 @jwt_required() 
 def upload_to_drive(file_path, file_name):
     try:
