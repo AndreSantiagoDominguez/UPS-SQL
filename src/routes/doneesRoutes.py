@@ -66,6 +66,6 @@ def download_drive():
     return send_file(file_data, mimetype='image/jpeg')
 
 @doneesBlueprint.route('/photo/<string:id_photo>', methods=['GET'])
-def viewPhotoName(name):
-    file_data = get_photo(name)
+def viewPhotoName(id_photo):
+    file_data = get_photo(id_photo)
     return send_file(file_data, mimetype='image/jpeg')
