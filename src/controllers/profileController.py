@@ -153,7 +153,7 @@ def getProfileById(id_donor):
 # Para buscar
 def searchByBloodType(bloodType):
     try:
-        donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Profile.blood_type == bloodType).limit(20).all()
+        donors = db.session.query(Donor, Profile).filter(Donor.id_donor == Profile.id_donor).filter(Profile.blood_type == bloodType).limit(100).all()
 
         if not donors:
             return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
@@ -187,7 +187,7 @@ def searchByBloodLocality(data):
             .filter(Donor.id_donor == Profile.id_donor)
             .filter(Profile.blood_type == bloodType)
             .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
-            .limit(20).all())
+            .limit(100).all())
 
         if not donors:
             return jsonify({"mensaje": "No se encontraron usuarios con ese tipo de sangre"}), 404
@@ -217,7 +217,7 @@ def searchByLocality(locality):
             db.session.query(Donor, Profile)
             .filter(Donor.id_donor == Profile.id_donor)
             .filter(func.jsonb_extract_path_text(Donor.address, 'locality') == locality)
-            .limit(20)
+            .limit(100)
             .all()
         )
 
